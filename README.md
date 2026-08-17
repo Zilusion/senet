@@ -2,7 +2,7 @@
 
 ## Content
 
-Welcome to [Senet](https://rpgheroes.netlify.app), a modern eCommerce platform dedicated to board game enthusiasts
+Welcome to [Senet](https://senet.demo.sudorgin.com), a modern eCommerce platform dedicated to board game enthusiasts.
 
 - [Overview and Purpose](#overview-and-purpose)
 - [Technical Stack](#technical-stack)
@@ -47,7 +47,7 @@ At Senet, we believe in the power of play to connect people. Our goal is to make
 1. Clone the repo
 
 ```sh
-  git clone https://github.com/ketrololz/market.git
+  git clone https://github.com/Zilusion/senet.git
 ```
 
 2. install PNPM package manager (if not installed)
@@ -71,7 +71,10 @@ At Senet, we believe in the power of play to connect people. Our goal is to make
 ## Available Scripts
 
 - `pnpm dev`: Starts the Vite development server for local development with hot module replacement.
+- `pnpm dev:demo`: Starts the self-contained portfolio demo without commercetools credentials.
 - `pnpm build`: Performs TypeScript project build using vue-tsc and then compiles the project with Vite for production.
+- `pnpm build:demo`: Builds the self-contained portfolio demo.
+- `pnpm generate:demo`: Regenerates the local demo catalogue from the preserved source dataset.
 - `pnpm preview`: Serves the production build locally to preview the deployed version of the app.
 - `pnpm prepare`: Runs Husky setup to enable Git hooks for enforcing code quality checks.
 - `pnpm test`: Executes all tests using Vitest in a Node environment.
