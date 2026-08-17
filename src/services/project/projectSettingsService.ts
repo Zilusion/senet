@@ -7,6 +7,7 @@ import {
   ProjectDataUnavailableError,
   AppError,
 } from '../appErrors';
+import { isDemoMode } from '@/demo/config';
 
 export interface ProjectSettings {
   languages: string[];
@@ -24,6 +25,19 @@ class ProjectSettingsService {
    * Throws ProjectSettingsFetchError or ProjectDataUnavailableError on failure.
    */
   public async fetchProjectData(): Promise<Project> {
+    if (isDemoMode) {
+      return {
+        version: 1,
+        key: 'senet-demo',
+        name: 'Senet Portfolio Demo',
+        countries: ['DE', 'US', 'RU'],
+        currencies: ['EUR', 'USD', 'RUB'],
+        languages: ['en', 'ru'],
+        createdAt: '2025-05-01T00:00:00.000Z',
+        messages: { enabled: false },
+        carts: { deleteDaysAfterLastModification: 30 },
+      } as Project;
+    }
     if (this.projectDataCache) {
       appLogger.log('ProjectSettingsService: Returning cached project data.');
       return this.projectDataCache;

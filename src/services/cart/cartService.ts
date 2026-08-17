@@ -9,6 +9,8 @@ import { parseError } from '../appErrors';
 import { userTokenCache } from '@/api/localStorageTokenCache';
 import { CtpClientFactory } from '@/api/ctpClientBuilderFactory';
 import { isNotFoundError } from '@/utils/isNotFoundError';
+import { isDemoMode } from '@/demo/config';
+import { demoCartService } from '@/demo/cartService';
 
 const cartDraft = {
   currency: 'EUR',
@@ -29,6 +31,7 @@ export class CartService {
   }
 
   public async getActiveCart(): Promise<Cart | null> {
+    if (isDemoMode) return demoCartService.getActiveCart();
     const session = await this.getSession();
 
     try {
@@ -55,6 +58,7 @@ export class CartService {
   }
 
   public async createCart(): Promise<Cart> {
+    if (isDemoMode) return demoCartService.createCart();
     const session = await this.getSession();
 
     try {
@@ -78,6 +82,7 @@ export class CartService {
   }
 
   public async deleteCart(cart: Cart): Promise<void> {
+    if (isDemoMode) return demoCartService.deleteCart(cart);
     const session = await this.getSession();
 
     try {
@@ -100,6 +105,9 @@ export class CartService {
     version: number,
     actions: MyCartUpdateAction[],
   ): Promise<Cart> {
+    if (isDemoMode) {
+      return demoCartService.updateCart(cartId, version, actions);
+    }
     const session = await this.getSession();
 
     try {
@@ -131,6 +139,9 @@ export class CartService {
     variantId: number,
     quantity = 1,
   ): Promise<Cart> {
+    if (isDemoMode) {
+      return demoCartService.addLineItemToCart(productId, variantId, quantity);
+    }
     let cart = await this.getActiveCart();
     if (!cart) {
       cart = await this.createCart();
@@ -153,6 +164,9 @@ export class CartService {
     cartVersion: number,
     code: string,
   ): Promise<Cart> {
+    if (isDemoMode) {
+      return demoCartService.applyDiscountCode(cartId, cartVersion, code);
+    }
     appLogger.log('CartService: Applying discount code:', { cartId, code });
     const action: MyCartUpdateAction = { action: 'addDiscountCode', code };
     return this.updateCart(cartId, cartVersion, [action]);
@@ -163,6 +177,13 @@ export class CartService {
     cartVersion: number,
     discountCode: DiscountCodeReference,
   ): Promise<Cart> {
+    if (isDemoMode) {
+      return demoCartService.removeDiscountCode(
+        cartId,
+        cartVersion,
+        discountCode,
+      );
+    }
     appLogger.log('CartService: Removing discount code:', {
       cartId,
       discountCodeId: discountCode.id,

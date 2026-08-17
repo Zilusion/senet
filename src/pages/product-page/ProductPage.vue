@@ -76,17 +76,15 @@ const productLineItem = computed<LineItem | undefined>(() => {
 const galleryImages = computed(() => {
   const p = product.value;
   if (!p || !p.masterVariant?.images?.length) return [];
-  return p.masterVariant.images
-    .filter((img: CtImage) => !img.url.includes('-main'))
-    .map((img: CtImage) => ({
-      itemImageSrc: img.url,
-      thumbnailImageSrc: img.url,
-      alt:
-        img.label ||
-        productName.value ||
-        t('productPage.imageAlt', 'Product Image'),
-      title: productName.value || t('productPage.imageTitle', 'Product Image'),
-    }));
+  return p.masterVariant.images.map((img: CtImage) => ({
+    itemImageSrc: img.url,
+    thumbnailImageSrc: img.url,
+    alt:
+      img.label ||
+      productName.value ||
+      t('productPage.imageAlt', 'Product Image'),
+    title: productName.value || t('productPage.imageTitle', 'Product Image'),
+  }));
 });
 
 const productHasMultipleImages = computed(() => galleryImages.value.length > 1);

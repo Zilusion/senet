@@ -12,6 +12,8 @@ dist
 dist-ssr
 *.local
 coverage
+.playwright-cli/
+output/
 
 # Editor directories and files
 .vscode/*

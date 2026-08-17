@@ -14,6 +14,7 @@ import { AuthError, ClientValidationError } from '@/services/appErrors';
 import { router } from '@/router/router';
 import { CtpClientFactory } from '@/api/ctpClientBuilderFactory';
 import type { CustomerAddressData } from '@/services/auth/types/customerAddressData';
+import { isDemoMode } from '@/demo/config';
 
 interface AuthStoreErrorDetails {
   i18nKey: AuthMessageKey | string;
@@ -327,14 +328,25 @@ export const useAuthStore = defineStore('auth', () => {
     setLoading(true);
     clearError();
     try {
-      const me = await CtpClientFactory.createApiRootWithUserSession()
-        .me()
-        .get()
-        .execute();
+      let customerId: string;
+      let customerVersion: number;
+
+      if (isDemoMode) {
+        if (!user.value) throw new Error('Demo session is not active');
+        customerId = user.value.id;
+        customerVersion = user.value.version;
+      } else {
+        const me = await CtpClientFactory.createApiRootWithUserSession()
+          .me()
+          .get()
+          .execute();
+        customerId = me.body.id;
+        customerVersion = me.body.version;
+      }
 
       const updatedUser = await AuthService.updatePassword({
-        id: me.body.id,
-        version: me.body.version,
+        id: customerId,
+        version: customerVersion,
         currentPassword: data.currentPassword,
         newPassword: data.newPassword,
       });

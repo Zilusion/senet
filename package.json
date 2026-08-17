@@ -5,7 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:demo": "vite --mode demo",
     "build": "vue-tsc -b && vite build",
+    "build:demo": "vue-tsc -b && vite build --mode demo",
+    "generate:demo": "node scripts/generate-demo-catalog.mjs",
     "preview": "vite preview",
     "prepare": "husky",
     "test": "vitest",

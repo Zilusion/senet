@@ -18,6 +18,8 @@ import AnonymousSessionService from './anonymousSessionService';
 import { validateData } from '@/utils/validationUtils';
 import type { CustomerAddressData } from './types/customerAddressData';
 import type { MyCustomerUpdateAction } from '@commercetools/platform-sdk';
+import { isDemoMode } from '@/demo/config';
+import { demoAuthService } from '@/demo/authService';
 
 class AuthService {
   /**
@@ -29,6 +31,8 @@ class AuthService {
     appLogger.log('AuthService: Attempting login with /me/login strategy...');
 
     await validateData(loginSchema, data, 'Login Data');
+
+    if (isDemoMode) return demoAuthService.login(data);
 
     const anonymousSession = await AnonymousSessionService.ensureSession();
     if (!anonymousSession) {
@@ -90,6 +94,8 @@ class AuthService {
     appLogger.log('AuthService: Attempting registration...');
 
     await validateData(registrationSchema, data, 'Registration Data');
+
+    if (isDemoMode) return demoAuthService.register(data);
 
     const anonymousSession = await AnonymousSessionService.ensureSession();
     if (!anonymousSession) {
@@ -162,6 +168,7 @@ class AuthService {
    * Log out the current user and revoke their session token.
    */
   public async logout(): Promise<void> {
+    if (isDemoMode) return demoAuthService.logout();
     appLogger.log('AuthService: Logging out...');
     const tokenCache = userTokenCache;
     const currentTokens = tokenCache.get();
@@ -197,6 +204,7 @@ class AuthService {
    * @returns The restored customer information or null if restoration fails.
    */
   public async restoreSession(): Promise<Customer | null> {
+    if (isDemoMode) return demoAuthService.restoreSession();
     appLogger.log('AuthService: Checking auth and refreshing token...');
     const initialTokenState = userTokenCache.get();
 
@@ -226,6 +234,7 @@ class AuthService {
     lastName: string;
     dateOfBirth: string;
   }): Promise<Customer> {
+    if (isDemoMode) return demoAuthService.updatePersonalInfo(data);
     appLogger.log('AuthService: Updating personal information...');
 
     try {
@@ -280,6 +289,12 @@ class AuthService {
     currentPassword: string;
     newPassword: string;
   }): Promise<Customer> {
+    if (isDemoMode) {
+      return demoAuthService.updatePassword({
+        currentPassword: data.currentPassword,
+        newPassword: data.newPassword,
+      });
+    }
     appLogger.log('AuthService: Updating password...');
 
     try {
@@ -319,6 +334,9 @@ class AuthService {
     addressId: string,
     type: 'shipping' | 'billing',
   ): Promise<Customer> {
+    if (isDemoMode) {
+      return demoAuthService.setDefaultAddress(addressId, type);
+    }
     appLogger.log(
       `AuthService: Setting default ${type} address to ID: ${addressId}`,
     );
@@ -354,6 +372,7 @@ class AuthService {
   }
 
   public async removeAddress(addressId: string): Promise<Customer> {
+    if (isDemoMode) return demoAuthService.removeAddress(addressId);
     appLogger.log(`AuthService: Removing address with ID: ${addressId}`);
 
     try {
@@ -385,6 +404,7 @@ class AuthService {
   }
 
   public async updateAddress(address: CustomerAddressData): Promise<Customer> {
+    if (isDemoMode) return demoAuthService.updateAddress(address);
     appLogger.log('AuthService: Updating customer address...', address);
     const apiRoot = CtpClientFactory.createApiRootWithUserSession();
     const current = await apiRoot.me().get().execute();

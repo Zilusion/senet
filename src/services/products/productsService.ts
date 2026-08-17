@@ -3,6 +3,8 @@ import { type ProductProjection } from '@commercetools/platform-sdk';
 import { getAppApiRoot } from '@api/ctpClient';
 import { parseError } from '@services/appErrors';
 import { useProjectSettingsStore } from '@/stores/projectSettingsStore';
+import { isDemoMode } from '@/demo/config';
+import { demoProductsService } from '@/demo/productsService';
 
 const settingsStore = useProjectSettingsStore();
 
@@ -40,12 +42,17 @@ export enum currency {
 }
 
 class ProductsService {
-  apiRoot = getAppApiRoot();
+  private get apiRoot() {
+    return getAppApiRoot();
+  }
 
   async fetchProduct(
     identifier: ProductIdentifier,
     options: ProductDetailOptions = {},
   ): Promise<ProductProjection | null> {
+    if (isDemoMode) {
+      return demoProductsService.fetchProduct(identifier, options);
+    }
     appLogger.log(
       `ProductsService: Fetching product by ${identifier.type}: ${identifier.value}`,
     );
@@ -125,6 +132,9 @@ class ProductsService {
   }
 
   async fetchCategories() {
+    if (isDemoMode) {
+      return demoProductsService.fetchCategories();
+    }
     appLogger.log('App.vue: Fetching products...');
     try {
       const response = await this.apiRoot
@@ -147,6 +157,9 @@ class ProductsService {
   }
 
   async fetchProductsPrice(categoryId: string, price: string = 'EUR') {
+    if (isDemoMode) {
+      return demoProductsService.fetchProductsPrice(categoryId, price);
+    }
     try {
       const filters = [];
       if (categoryId !== '0') {
@@ -194,6 +207,9 @@ class ProductsService {
   }
 
   async fetchProductsPageByCategory(product: productProperties) {
+    if (isDemoMode) {
+      return demoProductsService.fetchProductsPageByCategory(product);
+    }
     appLogger.log('App.vue: Fetching products...');
     try {
       const filters = [

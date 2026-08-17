@@ -36,35 +36,34 @@ function convertCardInfo(productInfo: ProductProjection) {
     return;
   }
 
-  const currency = {
-    position: 0,
-    sign: ' ₽',
-  };
-
-  if (userPreferencesStore.currentLanguage === 'en') {
-    currency.position = 0;
-    currency.sign = ' €';
-  }
-
-  const price =
-    prices[currency.position].value.centAmount / 100 + currency.sign;
-
-  const discounted =
-    productInfo.masterVariant.prices[currency.position].discounted;
+  const language = userPreferencesStore.currentLanguage;
+  const currencyCode = language === 'ru' ? 'RUB' : 'EUR';
+  const selectedPrice =
+    prices.find((price) => price.value.currencyCode === currencyCode) ||
+    prices[0];
+  const formatter = new Intl.NumberFormat(language, {
+    style: 'currency',
+    currency: selectedPrice.value.currencyCode,
+  });
+  const price = formatter.format(selectedPrice.value.centAmount / 100);
+  const discounted = selectedPrice.discounted;
 
   let newPrice;
 
   if (discounted) {
-    newPrice = discounted.value.centAmount / 100 + currency.sign;
+    newPrice = formatter.format(discounted.value.centAmount / 100);
   }
 
   const cardInfo = {
     image: productInfo.masterVariant.images
       ? productInfo.masterVariant.images[0].url
       : '/images/no-image.png',
-    name: productInfo.name[userPreferencesStore.currentLanguage],
+    name:
+      productInfo.name[language] || productInfo.name.en || productInfo.name.ru,
     description: productInfo.description
-      ? productInfo.description[userPreferencesStore.currentLanguage]
+      ? productInfo.description[language] ||
+        productInfo.description.en ||
+        productInfo.description.ru
       : 'No description',
     identifier: productInfo.slug?.en || productInfo.key || productInfo.id,
     price: price,
@@ -82,7 +81,7 @@ function navigate(identifier: string) {
   });
 }
 
-const cardInfo = convertCardInfo(props.productInfo);
+const cardInfo = computed(() => convertCardInfo(props.productInfo));
 
 async function addToCart() {
   try {
